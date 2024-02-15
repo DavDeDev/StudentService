@@ -1,20 +1,18 @@
-// Import necessary modules and dependencies
-const { addStudent, listStudents, listCourses, listStudentsByCourse } = require('../controllers/admin.controller');
-const { isAdmin } = require('../controllers/auth.controller');
 const express = require('express');
 const router = express.Router();
+const { isAdmin } = require('../controllers/auth.controller');
+const adminController = require('../controllers/admin.controller');
 
 // Add a student
-router.post('/students', isAdmin, addStudent);
+router.post('/students', isAdmin, adminController.addStudent);
 
 // List all students
-router.get('/students', isAdmin, listStudents);
+router.get('/students', isAdmin, adminController.listStudents);
 
 // List all courses
-router.get('/courses', isAdmin, listCourses);
+router.get('/courses', isAdmin, adminController.listCourses);
 
 // List all students taking a specific course
-router.get('/courses/:courseId/students', isAdmin, listStudentsByCourse);
+router.get('/courses/:courseId/students', isAdmin, adminController.listStudentsByCourse);
 
-// Export the router
 module.exports = router;

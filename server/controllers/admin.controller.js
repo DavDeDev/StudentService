@@ -18,7 +18,8 @@ const addStudent = async (req, res) => {
 const listStudents = async (req, res) => {
   try {
     const students = await Student.find();
-    res.status(200).json(students);
+    // res.status(200).json(students);
+    res.status(200).json({message: 'ciao'});
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch students' });
   }

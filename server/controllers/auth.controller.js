@@ -1,68 +1,31 @@
-// Middleware to check if the user is logged in as an admin
+// Middleware function to check if the user is logged in as admin
 function isAdmin(req, res, next) {
-  // Check if the user is logged in as an admin
-  if (req.user && req.user.role === 'admin') {
-    // User is logged in as an admin, proceed to the next middleware/controller
+  // console.log(req);
+  console.log(req.headers);
+  
+  // Check if the user is logged in as admin
+  if (req.headers.user && req.headers.user === 'admin') {
+    // User is logged in as admin, proceed to the next middleware or route handler
     next();
   } else {
-    // User is not logged in as an admin, redirect to the index page
+    // User is not logged in as admin, redirect to /index
     res.redirect('/index');
   }
 }
 
-// Middleware to check if the user is logged in as a student
+// Middleware function to check if the user is logged in as student
 function isStudent(req, res, next) {
-  // Check if the user is logged in as a student
-  if (req.user && req.user.role === 'student') {
-    // User is logged in as a student, proceed to the next middleware/controller
+  // Check if the user is logged in as student
+  if (req.user && req.session.role === 'student') {
+    // User is logged in as student, proceed to the next middleware or route handler
     next();
   } else {
-    // User is not logged in as a student, redirect to the index page
+    // User is not logged in as student, redirect to /index
     res.redirect('/index');
   }
 }
-
+// exports the middleware functions
 module.exports = {
   isAdmin,
-  isStudent
-};
-// Middleware function to check if the user is logged in as admin or student
-const checkUserRole = (req, res, next) => {
-  // Check if user is logged in
-  if (!req.session.user) {
-    // User is not logged in, redirect to index page
-    return res.redirect('/index');
-  }
-
-  // Check if user is admin
-  if (req.session.user.role === 'admin') {
-    // User is logged in as admin, continue to next controller
-    return next();
-  }
-
-  // Check if user is student
-  if (req.session.user.role === 'student') {
-    // User is logged in as student, continue to next controller
-    return next();
-  }
-
-  // User role is neither admin nor student, redirect to index page
-  return res.redirect('/index');
-};
-
-module.exports = checkUserRole;
-// Middleware to check if user is logged in as admin or student
-function checkLoggedIn(req, res, next) {
-  // Check if user is logged in as admin or student
-  if (req.session && (req.session.isAdmin || req.session.isStudent)) {
-    // User is logged in, proceed to next controller
-    next();
-  } else {
-    // User is not logged in, redirect to index page
-    res.redirect('/index');
-  }
-}
-
-module.exports = {
-  checkLoggedIn
+  isStudent,
 };

@@ -14,4 +14,13 @@ const studentSchema = new mongoose.Schema({
   strongestTechnicalSkill: String,
 });
 
+studentSchema.pre('save', function(next){
+  this.password = bcrypt.hashSync(this.password, saltRounds);
+  next();
+});
+
+studentSchema.methods.authenticate = function(password) {
+  return this.password === bcrypt.hashSync(password, saltRounds);
+}
+
 module.exports = mongoose.model('Student', studentSchema);

@@ -10,6 +10,7 @@ module.exports = function () {
     });
 
   require('../models/student.model');
+  require('../models/admin.model');
   require('../models/course.model');
   // Return the Mongoose connection instance
   return db;
