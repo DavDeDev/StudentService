@@ -3,11 +3,9 @@ const router = express.Router();
 const { isAdmin } = require('../controllers/auth.controller');
 const adminController = require('../controllers/admin.controller');
 
-// Add a student
-router.post('/students', isAdmin, adminController.addStudent);
-
-// List all students
-router.get('/students', isAdmin, adminController.listStudents);
+router.route('/students')
+  .post(isAdmin, adminController.addStudent)
+  .get(isAdmin, adminController.listStudents);
 
 // List all courses
 router.get('/courses', isAdmin, adminController.listCourses);

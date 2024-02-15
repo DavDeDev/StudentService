@@ -1,6 +1,8 @@
 var createError = require('http-errors');
-var express = require('express');
+const express = require('express');
+const cors = require('cors');
 var path = require('path');
+
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('./config/mongoose');
@@ -13,6 +15,7 @@ var adminRouter = require('./routes/admin.routes');
 var studentRouter = require('./routes/student.routes');
 
 var app = express();
+app.use(cors());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -29,12 +32,12 @@ app.use('/admin', adminRouter);
 app.use('/student', studentRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

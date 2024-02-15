@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const studentSchema = new mongoose.Schema({
   studentNumber: { type: String, required: true, unique: true },
@@ -19,8 +21,9 @@ studentSchema.pre('save', function(next){
   next();
 });
 
-studentSchema.methods.authenticate = function(password) {
-  return this.password === bcrypt.hashSync(password, saltRounds);
+studentSchema.methods.authenticate = async function(password) {
+  console.log('authenticating')
+  return await bcrypt.compare(password, this.password);
 }
 
 module.exports = mongoose.model('Student', studentSchema);

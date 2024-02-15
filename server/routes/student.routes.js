@@ -3,22 +3,24 @@ const express = require('express');
 const router = express.Router();
 const { isStudent } = require('../controllers/auth.controller');
 const {
+  signup,
+  login,
   addCourse,
   updateCourse,
   dropCourse,
   listCourses
 } = require('../controllers/student.controller');
 
-// Add a course for a student
-router.post('/students/:studentId/courses',isStudent, addCourse);
+router.route('/:studentId/courses')
+  .post(isStudent, addCourse)
+  .get(listCourses);
 
-// Update a course for a student
-router.put('/students/:studentId/courses/:courseId',isStudent, updateCourse);
+router.route('/:studentId/courses/:courseId')
+  .put(isStudent, updateCourse)
+  .delete(isStudent, dropCourse);
 
-// Drop a course for a student
-router.delete('/students/:studentId/courses/:courseId',isStudent, dropCourse);
+router.post('/signup', signup);
+router.post('/login', login);
 
-// List all courses taken by a student
-router.get('/students/:studentId/courses',isStudent, listCourses);
 
 module.exports = router;
