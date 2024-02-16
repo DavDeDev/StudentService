@@ -13,21 +13,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { z } from "zod"
+import { useRouter } from 'next/router'
+import { DataTableRowActions } from "./data-table-actions"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 // use zod schema
 const courseSchema = z.object({
+  courseId: z.string().min(1),
   courseCode: z.string().min(1),
   courseName: z.string().min(1),
   section: z.string().optional(),
   semester: z.string().optional(),
-  students: z.array(z.string()),
+  numOfStudents: z.number(),
 });
 
 export type CourseType = z.infer<typeof courseSchema>
 
+
+
 export const columns: ColumnDef<CourseType>[] = [
+
   {
     accessorKey: "courseCode",
     header: "Course Code",
@@ -45,47 +51,13 @@ export const columns: ColumnDef<CourseType>[] = [
     header: "Semester",
   },
   {
-    accessorKey: "students",
+    accessorKey: "numOfStudents",
     header: "Students",
-    cell: ({ row }) => {
-      return (
 
-        // count the number of students in the course
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              {row.original.students.length}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Students</DropdownMenuLabel>
-            {row.original.students.map((student) => (
-              <DropdownMenuItem key={student}>{student}</DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    }
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
+    cell: ({ row }) => <DataTableRowActions row={row} />
+
   }
 ]

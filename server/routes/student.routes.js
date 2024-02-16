@@ -12,12 +12,12 @@ const {
 } = require('../controllers/student.controller');
 
 router.route('/:studentId/courses')
-  .post(isStudent, addCourse)
+  .post( addCourse)
   .get(listCourses);
 
 router.route('/:studentId/courses/:courseId')
   .put(isStudent, updateCourse)
-  .delete(isStudent, dropCourse);
+  .delete( dropCourse);
 
 router.post('/signup', signup);
 router.post('/login', login);

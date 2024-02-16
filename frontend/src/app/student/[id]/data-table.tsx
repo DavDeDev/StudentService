@@ -89,7 +89,7 @@ export function DataTable<TData, TValue>({
         >
           Add Course
         </Button>
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end space-x-2">
 
           <Button
             variant="outline"

@@ -11,20 +11,49 @@ const mongoose = require('mongoose');
 
 // Add a course for a student
 const addCourse = async (req, res) => {
+  const { studentId, courseCode, sectionName } = req.body;
+
   try {
-    const { studentId, courseId } = req.body;
-    const student = await Student.findById(studentId);
-    const course = await Course.findById(courseId);
-    if (!student || !course) {
-      return res.status(404).json({ error: 'Student or course not found' });
+    // Find the course based on courseId
+    const course = await Course.findOne({ courseCode });
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
     }
-    student.courses.push(course);
-    await student.save();
-    res.status(200).json({ message: 'Course added successfully' });
+    const section = course.sections.find(sec => sec.sectionName === sectionName);
+
+    if (!section) {
+      return res.status(404).json({ error: 'Section not found in the course' });
+    }
+
+    // Check if the student is already enrolled in any section of the course
+    const isEnrolledInCourse = course.sections.some(sec => sec.students.includes(studentId));
+
+    if (isEnrolledInCourse) {
+      // Check if the section exists in the course
+
+      // Check if the student is already in the section
+      if (section.students.includes(studentId)) {
+        return res.status(400).json({ error: 'Student is already enrolled in the section' });
+      }
+      return res.status(400).json({ error: 'Student is already enrolled in another section of the course' });
+    }
+
+
+    // Add the student to the section
+    section.students.push(studentId);
+
+    // Save the updated course
+    await course.save();
+
+    res.status(200).json({ message: 'Student successfully added to the section' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add course' });
+    console.error('Error adding course:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
 
 // Update a course for a student
 const updateCourse = async (req, res) => {
@@ -49,51 +78,81 @@ const updateCourse = async (req, res) => {
 
 // Drop a course for a student
 const dropCourse = async (req, res) => {
+  console.log("❌ dropCourse")
+  const { studentId, courseId } = req.params;
+  console.log(studentId)
+  console.log(courseId)
+
   try {
-    const { studentNumber, courseId } = req.body;
-    const student = await Student.findOne({ studentNumber: studentNumber });
-    const course = await Course.findById(courseId);
-    if (!student || !course) {
-      return res.status(404).json({ error: 'Student or course not found' });
+    // Validate that studentId and courseId are valid
+    if (!mongoose.Types.ObjectId.isValid(studentId) || !mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ error: 'Invalid studentId or courseId' });
     }
-    student.courses = student.courses.filter((c) => c._id.toString() !== courseId);
-    await student.save();
+
+    const student = await Student.findById(studentId);
+    console.log(student)
+    // Find the course based on courseId
+    const course = await Course.findById(courseId);
+    console.log(course)
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    // Check if the student is enrolled in the course
+    const sectionWithStudent = course.sections.find(section => section.students.includes(studentId));
+
+    if (!sectionWithStudent) {
+      return res.status(400).json({ error: 'Student is not enrolled in the course' });
+    }
+
+    // Remove the student from the course
+    sectionWithStudent.students = sectionWithStudent.students.filter(id => id.toString() !== studentId);
+
+    // Save the updated course
+    await course.save();
+
     res.status(200).json({ message: 'Course dropped successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to drop course' });
+    console.error('Error dropping course:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 // List all courses taken by a student
 const listCourses = async (req, res) => {
   console.log("listCourses")
+  const { studentId } = req.params;
+  console.log(studentId)
   try {
-    const { studentId } = req.params;
+    // Find all courses where the student is present
+    const courses = await Course.find({ 'sections.students': new mongoose.Types.ObjectId(studentId) });
 
-    console.log(studentId)
+    // Extract and return courses with section numbers
+    const coursesWithSections = courses.map(course => {
+      const sectionWithStudent = course.sections.find(section => section.students.includes(studentId));
 
-    // Find the student by studentId
-    const student = await Student.findById(studentId);
+      return {
+        courseId: course._id,
+        courseCode: course.courseCode,
+        courseName: course.courseName,
+        section: sectionWithStudent.sectionName,
+        semester: course.semester,
+        numOfStudents: sectionWithStudent.students.length
+      };
+    });
 
-    console.log(student)
+    console.log(coursesWithSections);
 
-    if (!student) {
-      return res.status(404).json({ error: 'Student not found' });
-    }
-
-    // Retrieve courses using the Course model based on student's ObjectId
-    // const courses = await Course.find({ students: { $elemMatch: { $eq: student._id } } });
-    // const courses = await Course.find({ students: mongoose.Types.ObjectId(studentId) });    // const 
-    //docs = await Documents.find({category: { $elemMatch: {$eq: 'yourCategory'} }});
-    //retrieve all courses
-    const courses = await Course.find().populate('students');
-    console.log("courses>>>>>>>>>>>>>" + courses)
-
-    res.status(200).json({ courses });
+    // Send the response
+    res.status(200).json({ courses: coursesWithSections });
   } catch (error) {
-    res.status(500).json({ error: error + 'Failed to list courses' });
+    console.error('Error finding sections:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
-};
+}
+
+
 
 const signup = async (req, res) => {
   try {
