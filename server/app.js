@@ -2,6 +2,7 @@ var createError = require('http-errors');
 const express = require('express');
 const cors = require('cors');
 var path = require('path');
+var session = require('express-session');
 
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -15,7 +16,27 @@ var adminRouter = require('./routes/admin.routes');
 var studentRouter = require('./routes/student.routes');
 
 var app = express();
-app.use(cors());
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+app.use(cors({ 
+  origin: 'http://localhost:3000',  // Allow requests from your frontend
+  credentials: true,  // Allow credentials (cookies)
+}));
+//
+//handle the use of PUT or DELETE methods
+//override with POST having ?_method=DELETE or
+// ?_method=PUT
+//saveUninitialized - orces a session that is "uninitialized" to be saved to the store
+//resave - forces the session to be saved back to the session store
+// Configure the 'session' middleware
+app.use(session({
+  saveUninitialized: true,
+  resave: true,
+  secret: "developmentSessionSecret"
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

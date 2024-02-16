@@ -2,8 +2,8 @@
 const Student = require('../models/student.model');
 const Course = require('../models/course.model');
 const jwt = require('jsonwebtoken');
-const jwtKey = 'my_secret';
-const jwtExpirySeconds = 300;
+const jwtKey = 'true_secret';
+const jwtExpirySeconds = 3000;
 
 // Import necessary modules and models
 const mongoose = require('mongoose');
@@ -122,10 +122,13 @@ const dropCourse = async (req, res) => {
 // List all courses taken by a student
 const listCourses = async (req, res) => {
   console.log("listCourses")
+  
   const { studentId } = req.params;
   console.log(studentId)
   try {
     // Find all courses where the student is present
+    // here is not retrieving the correct studentId
+    console.log(">>>>>>>>>>>>>>>>>>>>>studentId", studentId)
     const courses = await Course.find({ 'sections.students': new mongoose.Types.ObjectId(studentId) });
 
     // Extract and return courses with section numbers
@@ -185,6 +188,7 @@ const signup = async (req, res) => {
 
 const login = async (req, res) => {
   try {
+    console.log(req.body)
     console.log("login");
     const { studentNumber, password } = req.body;
     const student = await Student.findOne({ studentNumber });
@@ -211,7 +215,37 @@ const login = async (req, res) => {
   }
 };
 
+
+
+const isStudentLoggedIn = async (req, res, next) => {
+  console.log("isStudentLoggedIn");
+  console.log(req);
+  const token = req.cookies.token;
+  console.log("token", token);
+  // if the cookie is not set, return an unauthorized error and redirect to login page
+  if (!token) {
+    return res.status(401).end();
+  }
+
+  var payload;
+  try {
+    // Parse the JWT string and store the result in `payload`.
+    // Note that we are passing the key in this method as well. This is the secret key that was used to sign the JWT.
+    payload = jwt.verify(token, jwtKey);
+    console.log('payload', payload)
+    next();
+  } catch (e) {
+    if (e instanceof jwt.JsonWebTokenError) {
+      // the JWT is unauthorized, return a 401 error
+      return res.status(401).end();
+    }
+    // otherwise, return a bad request error
+    return res.status(400).end();
+  }
+}
+
 module.exports = {
+  isStudentLoggedIn,
   signup,
   login,
   addCourse,

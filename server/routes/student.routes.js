@@ -1,8 +1,8 @@
 // Import necessary modules and models
 const express = require('express');
 const router = express.Router();
-const { isStudent } = require('../controllers/auth.controller');
 const {
+  isStudentLoggedIn,
   signup,
   login,
   addCourse,
@@ -12,12 +12,12 @@ const {
 } = require('../controllers/student.controller');
 
 router.route('/:studentId/courses')
-  .post( addCourse)
+  .post(addCourse)
   .get(listCourses);
 
 router.route('/:studentId/courses/:courseId')
-  .put(isStudent, updateCourse)
-  .delete( dropCourse);
+  .put(isStudentLoggedIn, updateCourse)
+  .delete(isStudentLoggedIn, dropCourse);
 
 router.post('/signup', signup);
 router.post('/login', login);

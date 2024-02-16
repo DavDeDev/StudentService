@@ -13,19 +13,7 @@ function isAdmin(req, res, next) {
   }
 }
 
-// Middleware function to check if the user is logged in as student
-function isStudent(req, res, next) {
-  // Check if the user is logged in as student
-  if (req.user && req.session.role === 'student') {
-    // User is logged in as student, proceed to the next middleware or route handler
-    next();
-  } else {
-    // User is not logged in as student, redirect to /index
-    res.redirect('/index');
-  }
-}
 // exports the middleware functions
 module.exports = {
   isAdmin,
-  isStudent,
 };
