@@ -5,6 +5,7 @@ import { Row } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { useRouter } from 'next/navigation';
 
+import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,6 +29,7 @@ export function DataTableRowActions<TData>({
   console.log(pathname);
 
 
+
   const dropCourse = async (courseId: string) => {
     const studentId = pathname.split('/')[2];
     console.log(studentId);
@@ -39,20 +41,39 @@ export function DataTableRowActions<TData>({
     console.log("Dropping course " + courseId);
 
     try {
-      const response = await fetch(`http://localhost:3001/student/${studentId}/courses/${courseId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      // const response = await fetch(`http://localhost:3001/student/${studentId}/courses/${courseId}`, {
+      //   method: 'DELETE',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     credentials: 'include',
+      //     'Authorization': `Bearer ${token}`,
 
-      if (!response.ok) {
-        throw new Error(`Failed to drop course: ${response.statusText}`);
-      }
+      //   }
+      // });
 
-      console.log("Course dropped successfully");
-      // router.replace(pathname);
-      router.refresh();
+      // if (!response.ok) {
+      //   throw new Error(`Failed to drop course: ${response.statusText}`);
+      // }
+
+      // console.log("Course dropped successfully");
+      // // router.replace(pathname);
+      // router.refresh();
+
+      // with axios and cookies
+      await axios.delete(`http://localhost:3001/student/${studentId}/courses/${courseId}`, {
+        withCredentials: true,  // Include this option
+        // headers: {
+        //   'Authorization': `Bearer ${token}`,
+        // }
+      }).then((response) => {
+          console.log(response);
+          console.log(response.data);
+          router.refresh();
+        })
+        .catch((error) => {
+          console.error('Drop course error:', error);
+        })
+      
     } catch (error) {
       console.error("Error dropping course:", error);
       throw error;

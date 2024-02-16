@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useRouter } from 'next/navigation'
 import Link from "next/link"
+import axios from "axios"
 
 
 const studentLoginSchema = z.object({
@@ -38,35 +39,56 @@ export function StudentLoginForm() {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof studentLoginSchema>) {
-    console.log("login form submitted", values)
-    // Make a POST request to your server with the login data
-    const response = await fetch('http://localhost:3001/student/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(values),
-    });
-    if (response.ok) {
-      // Successful login
-      const data = await response.json();
-      console.log(data)
 
-      if (data.studentId) {
-        // Access the studentId and use it as needed
-        console.log('Student ID:', data.studentId);
-        // Perform actions with the studentId, such as redirecting
-        // router.push("someBasePath/" + route)
-        router.push("/student/" + data.studentId);
-      } else {
-        console.error('Student ID not found in the response');
-      }
+    // with axios and cookie
 
-    } else {
-      // Handle login error
-      const data = await response.json();
-      console.error('Login error:', data.error);
-    }
+    await axios.post('http://localhost:3001/student/login', values, {
+      withCredentials: true,  // Include this option
+    })
+      .then((response) => {
+        console.log(response);
+        console.log(response.data);
+        if (response.data.studentId) {
+          console.log('Student ID:', response.data.studentId);
+          router.push("/student/" + response.data.studentId);
+        } else {
+          console.error('Student ID not found in the response');
+        }
+      })
+      .catch((error) => {
+        console.error('Login error:', error);
+      });
+
+
+    // console.log("login form submitted", values)
+    // // Make a POST request to your server with the login data
+    // const response = await fetch('http://localhost:3001/student/login', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify(values),
+    // });
+    // if (response.ok) {
+    //   // Successful login
+    //   const data = await response.json();
+    //   console.log(data)
+
+    //   if (data.studentId) {
+    //     // Access the studentId and use it as needed
+    //     console.log('Student ID:', data.studentId);
+    //     // Perform actions with the studentId, such as redirecting
+    //     // router.push("someBasePath/" + route)
+    //     router.push("/student/" + data.studentId);
+    //   } else {
+    //     console.error('Student ID not found in the response');
+    //   }
+
+    // } else {
+    //   // Handle login error
+    //   const data = await response.json();
+    //   console.error('Login error:', data.error);
+    // }
   }
   return (
     <Form {...form} >

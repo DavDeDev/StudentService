@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useRouter } from 'next/navigation'
 import Link from "next/link"
+import axios from "axios"
 
 
 const studentRegistrationSchema = z.object({
@@ -44,34 +45,35 @@ export function StudentRegistrationForm() {
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof studentRegistrationSchema>) {
     try {
-      // Make a POST request to your server with the registration data
-      const response = await fetch('http://localhost:3001/student/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
-      });
+      // Make a POST request to your server with the registration data with credentials
+      // const response = await fetch('http://localhost:3001/student/signup', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(values),
+      // });
 
-      if (response.ok) {
-        // Successful registration
-        const data = await response.json();
+      // with axios and cookie
+      const response = await axios.post('http://localhost:3001/student/signup', values, {
+        withCredentials: true,  // Include this option
+      }).then
+        ((response) => {
+          console.log(response);
+          console.log(response.data);
+          if (response.data.studentId) {
+            console.log('Student ID:', response.data.studentId);
+            router.push("/student/" + response.data.studentId);
+          } else {
+            console.error('Student ID not found in the response');
+          }
+        })
+        .catch((error) => {
+          console.error('Registration error:', error);
+        })
+      ;
 
-        if (data.studentId) {
-          // Access the studentId and use it as needed
-          console.log('Student ID:', data.studentId);
-          // Perform actions with the studentId, such as redirecting
-          // router.push("someBasePath/" + route)
-          router.push(data.studentId);
-        } else {
-          console.error('Student ID not found in the response');
-        }
-
-      } else {
-        // Handle registration error
-        const data = await response.json();
-        console.error('Registration error:', data.error);
-      }
+      
     } catch (error) {
       console.error('Failed to register:', error);
     }
